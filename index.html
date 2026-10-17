@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дружная семья — приключение с Яшей</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #EAF6EE; /* светло-зелёный, наш стиль */
+    min-height: 100vh; display: flex; justify-content: center; padding: 10px;
+  }
+  #app { max-width: 760px; width: 100%; }
+  .card {
+    background: #ffffff; border-radius: 24px; padding: 20px;
+    border: 2px solid #C8E6C9; /* рамки зелёные */
+    box-shadow: 0 6px 24px rgba(46,125,50,.12);
+    margin-bottom: 14px;
+  }
+  h1 { font-size: 26px; color: #2E7D32; text-align: center; }
+  h2 { font-size: 20px; color: #2E7D32; text-align: center; margin-bottom: 12px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; }
+  .stars { font-size: 20px; letter-spacing: 3px; }
+  .progress { font-size: 14px; color: #2E7D32; }
+  .dialog {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: #ffffff; border: 2px solid #C8E6C9; border-radius: 18px; padding: 14px;
+    margin-bottom: 14px;
+  }
+  .avatar { font-size: 44px; line-height: 1; }
+  .avatar-img { width: 108px; height: 108px; border-radius: 50%; object-fit: cover;
+                  border: 3px solid #A5D6A7; background: #fff; flex-shrink: 0; }
+  .h2avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
+                  border: 2px solid #A5D6A7; vertical-align: middle; margin-right: 10px; }
+  .speech { font-size: 17px; line-height: 1.45; color: #1A1A1A; }
+  .imgwrap { text-align: center; margin: 10px 0; }
+  .imgwrap img { max-width: 100%; max-height: 340px; border-radius: 18px; }
+  .imgwrap .portrait { max-height: 300px; border-radius: 50%; border: 5px solid #A5D6A7; }
+  button {
+    display: block; width: fit-content; min-width: 160px;
+    font-size: 19px; font-family: inherit;
+    padding: 12px 26px; margin: 8px auto;
+    border: 2px solid #2E7D32; border-radius: 14px; cursor: pointer;
+    background: #ffffff; color: #2E7D32; font-weight: 700;
+    transition: transform .08s, background .15s;
+  }
+  button:active { transform: scale(0.97); }
+  button.opt { background: #fff; border: 2px solid #2E7D32; text-align: center; }
+  .row2 button { flex: none; }
+.numrow { display: flex; gap: 12px; justify-content: center; margin: 12px 0; }
+.numrow .opt { flex: 1; max-width: 130px; text-align: center; font-size: 30px; font-weight: bold; padding: 14px 10px; }
+  button.imgopt { display: flex; align-items: center; gap: 12px; background: #fff; border: 2px solid #2E7D32; }
+  button.imgopt img { width: 62px; height: 62px; border-radius: 50%; object-fit: cover; border: 2px solid #A5D6A7; background: #fff; flex-shrink: 0; }
+  button.imgopt.good, button.opt.good { background: #a5d6a7 !important; border-color: #66bb6a !important; }
+  button.imgopt.bad, button.opt.bad { background: #ffcdd2 !important; border-color: #e57373 !important; }
+  .riddle { font-style: italic; color: #1A1A1A; font-size: 18px; text-align: center; margin: 12px 0; }
+  .label { font-size: 18px; color: #1A1A1A; text-align: center; margin: 10px 0; }
+  .row2 { display: flex; gap: 10px; justify-content: center; }
+  .answer-list li { font-size: 16px; margin: 6px 0 6px 20px; color: #1A1A1A; }
+  .bigstar { font-size: 90px; text-align: center; animation: pop .5s ease; }
+  @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  .hidden { display: none !important; }
+  video { width: 100%; border-radius: 18px; background: #000; }
+  .find2 { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .find2 img { max-width: 48%; border-radius: 14px; border: 3px solid #A5D6A7; }
+  .note { font-size: 13px; color: #2E7D32; text-align: center; margin-top: 8px; }
+  .findwrap { position: relative; display: inline-block; width: 100%; border-radius: 18px; overflow: hidden; }
+  .findwrap img { display: block; width: 100%; }
+  .hot { position: absolute; border: 3px solid transparent; border-radius: 10px; cursor: pointer; }
+  .hot:hover { border-color: #ffb95e; background: rgba(255, 185, 94, 0.15); }
+  .hot.found { border-color: #4caf50; background: rgba(76, 175, 80, 0.25); pointer-events: none; }
+  .hot.found::after { content: "✅"; position: absolute; top: -14px; right: -6px; font-size: 22px; }
+  .hot.hint { animation: hintblink 0.6s ease 3; }
+  @keyframes hintblink { 50% { border-color: #ff3b3b; background: rgba(255, 59, 59, 0.2); } }
+  /* ===== РЕЖИМ БОЛЬШОГО ЭКРАНА: интерактивная доска/проектор ===== */
+  @media (min-width: 1500px) {
+   body { zoom: 1.6; }
+  }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ШАПКА -->
+  <div class="topbar">
+    <div class="stars" id="starBar">☆☆☆☆☆☆☆</div>
+    <div class="progress" id="progressTxt">1 / 7</div>
+  </div>
+
+  <!-- КОНТЕНТ -->
+  <div id="content"></div>
+
+</div>
+
+<script>
+"use strict";
+/* ============ РЕСУРСЫ ============ */
+const IMG = {
+  mama: "images/mama.jpg", papa: "images/papa.jpg", babushka: "images/babushka.jpg",
+  dedushka: "images/dedushka.jpg", dochka: "images/dochka.jpg", synok: "images/synok.jpg",
+  mama_gotovit: "images/mama_gotovit.jpg", papa_chinit: "images/papa_chinit.jpg",
+  babushka_pechet: "images/babushka_pechet.jpg", dedushka_chitaet: "images/dedushka_chitaet.jpg",
+  dochka_risuet: "images/dochka_risuet.jpg", synok_stroit: "images/synok_stroit.jpg",
+  vsya_semya: "images/vsya_semya.jpg",
+  /* Было (эталон) = файл _1: чистая комната, БЕЗ часов/цветов/бантиков.
+     Стало (после шалости) = файл _2: Баловашка их ДОБАВИЛ — на них и кликаем */
+  gostinaya1: "images/gostinaya_1.jpg",
+  gostinaya2: "images/gostinaya_2.jpg"
+};
+const V = {
+  start: "https://r2.syntx.ai/user_1804534798/generated/aa7982ab08bfca7f11f5e8eed3585595_47141e88-4914-4a4a-a7b4-283651c3c0a4.mp4",
+  end: "video/itog_zvezdochka.mp4"
+};
+const GOOD_S = ["sounds/Верно.mp3","sounds/Молодец-_3_.mp3","sounds/Правильно.mp3","sounds/Олично.mp3"];
+const BAD_S  = ["sounds/Подумай.mp3","sounds/Попробуй-еще.mp3","sounds/Почти.mp3","sounds/Не-совсем.mp3"];
+
+const FAMILY = [
+  { id: "mama", name: "мама",     img: IMG.mama },
+  { id: "papa", name: "папа",     img: IMG.papa },
+  { id: "babushka", name: "бабушка", img: IMG.babushka },
+  { id: "dedushka", name: "дедушка", img: IMG.dedushka },
+  { id: "dochka", name: "дочка",  img: IMG.dochka },
+  { id: "synok", name: "сынок",   img: IMG.synok }
+];
+const ACTS = [
+  { id: "mama_gotovit", action: "готовит обед", who: "mama", img: IMG.mama_gotovit, q: "Кто готовит обед?" },
+  { id: "papa_chinit",  action: "чинит полку",  who: "papa", img: IMG.papa_chinit,  q: "Кто чинит полку?" },
+  { id: "babushka_pechet", action: "печёт пирог", who: "babushka", img: IMG.babushka_pechet, q: "Кто печёт пирог?" },
+  { id: "dedushka_chitaet", action: "читает книгу", who: "dedushka", img: IMG.dedushka_chitaet, q: "Кто читает книгу?" },
+  { id: "dochka_risuet", action: "рисует картину", who: "dochka", img: IMG.dochka_risuet, q: "Кто рисует картину?" },
+  { id: "synok_stroit", action: "строит башню", who: "synok", img: IMG.synok_stroit, q: "Кто строит башню из кубиков?" }
+];
+
+/* ============ СОСТОЯНИЕ ============ */
+let step = 0;
+let earnedStars = 0;
+let locked = false;
+const content = document.getElementById("content");
+const starBar = document.getElementById("starBar");
+const progressTxt = document.getElementById("progressTxt");
+const TOTAL_STEPS = 7;
+
+const audioCache = {};
+let curKind = null; // 'voice' — реплика героя, 'fx' — звук-похвала
+let voiceTimers = []; // запланированные голоса (отменяются при клике)
+function stopAll() {
+  voiceTimers.forEach(clearTimeout);
+  voiceTimers = [];
+  for (const k in audioCache) {
+    try { audioCache[k].pause(); audioCache[k].currentTime = 0; } catch (e) {}
+  }
+  curKind = null;
+}
+function fxPlay(path) {
+  if (curKind === "fx") return; // похвала не обрывает похвалу — даём доиграть
+  stopAll();
+  curKind = "fx";
+  try {
+    if (!audioCache[path]) audioCache[path] = new Audio(path);
+    const a = audioCache[path];
+    a.onended = () => { curKind = null; };
+    a.currentTime = 0;
+    a.play().catch(() => { curKind = null; });
+  } catch (e) { curKind = null; }
+}
+function playVoice(path, delay) {
+  const doPlay = () => {
+    stopAll();
+    curKind = "voice";
+    try {
+      if (!audioCache[path]) audioCache[path] = new Audio(path);
+      const a = audioCache[path];
+      a.onended = () => { curKind = null; };
+      a.currentTime = 0;
+      const pr = a.play();
+      if (pr && pr.catch) pr.catch(() => { curKind = null; });
+    } catch (e) { curKind = null; }
+  };
+  if (delay) {
+    const id = setTimeout(() => {
+      voiceTimers = voiceTimers.filter(t => t !== id);
+      doPlay();
+    }, delay);
+    voiceTimers.push(id);
+  } else {
+    voiceTimers.forEach(clearTimeout);
+    voiceTimers = [];
+    doPlay();
+  }
+}
+function sound(kind) {
+  const arr = kind === "good" ? GOOD_S : BAD_S;
+  fxPlay(arr[Math.floor(Math.random() * arr.length)]);
+}
+function shuffle(a) {
+  const r = a.slice();
+  for (let i = r.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [r[i], r[j]] = [r[j], r[i]];
+  }
+  return r;
+}
+function render() {
+  progressTxt.textContent = (step + 1) + " / " + TOTAL_STEPS;
+  switch (step) {
+    case 0: screenTitle(); break;
+    case 1: screenVideoStart(); break;
+    case 2: game1(); break;
+    case 3: game2(); break;
+    case 4: game3(); break;
+    case 5: game4(); break;
+    case 6: screenFinal(); break;
+  }
+}
+function addStar() {
+  earnedStars++;
+  let s = "";
+  for (let i = 0; i < 7; i++) s += i < earnedStars ? "⭐" : "☆";
+  starBar.textContent = s;
+}
+
+/* ============ ЭКРАН 0: ТИТУЛ И ЗАГАДКА ============ */
+function screenTitle() {
+  content.innerHTML = `
+    <div class="card">
+      <div style="text-align:center;margin-bottom:8px">
+        <video src="video/logo_yasha.mp4" poster="images/poster_logo.jpg" autoplay muted loop playsinline
+               style="width:min(58vw,300px);border-radius:22px;border:4px solid #fff;box-shadow:0 6px 26px rgba(0,0,0,.18)"></video>
+      </div>
+      <h1>Дружная семья</h1>
+      <div class="dialog">
+        <img class="avatar-img" src="images/heroes/yasha.jpg" alt="Яша">
+        <div class="speech">Привет, дружок! Я — Яша! Отгадай мою загадку — а я тебе её прошепчу, если нажмёшь на кнопку!</div>
+      </div>
+      <button onclick="playVoice('sounds/v01.mp3')">🔊 Послушать Яшу</button>
+      <div class="riddle">«У мамы есть, у папы есть, у бабушки есть, у дедушки есть… и у тебя есть!» Что это?</div>
+      <button class="opt" onclick="answerRiddle(true)">Семья! 💛</button>
+      <button class="opt" onclick="answerRiddle(false)">Собака 🐕</button>
+    </div>`;
+}
+function answerRiddle(correct) {
+  if (locked) return; locked = true;
+  const btns = content.querySelectorAll("button.opt");
+  if (correct) {
+    btns[0].classList.add("good");
+    sound("good"); addStar();
+    setTimeout(() => { locked = false; step = 1; render(); }, 900);
+  } else {
+    btns[1].classList.add("bad");
+    sound("bad");
+    setTimeout(() => { btns[1].classList.remove("bad"); locked = false; }, 700);
+  }
+}
+
+/* ============ ЭКРАН 1: ВИДЕО-НАЧАЛО ============ */
+function screenVideoStart() {
+  content.innerHTML = `
+    <div class="card">
+      <h2>🎬 Смотри мультик!</h2>
+      <div class="dialog">
+        <img class="avatar-img" src="images/heroes/yasha.jpg" alt="Яша">
+        <div class="speech">Сейчас начнётся наше приключение. Нажми на кнопку и посмотри, что случилось с семьёй!</div>
+      </div>
+      <button onclick="playVoice('sounds/v02.mp3')">🔊 Послушать Яшу</button>
+      <video id="v1" src="${V.start}" playsinline preload="none"></video>
+      <button onclick="document.getElementById('v1').play()">▶ Смотреть мультик</button>
+      <div class="row2">
+        <button id="afterV" class="hidden" onclick="step=2;render()">Дальше ➡</button>
+        <button id="skipV" onclick="step=2;render()">Пропустить ➡</button>
+      </div>
+    </div>`;
+  const v = document.getElementById("v1");
+  v.preload = "auto"; v.load(); // фоновая загрузка — к клику видео готово
+  v.addEventListener("ended", () => {
+    document.getElementById("afterV").classList.remove("hidden");
+    sound("good");
+  });
+  v.addEventListener("error", () => {
+    document.getElementById("afterV").classList.remove("hidden");
+  });
+}
+
+/* ============ ИГРА 1: КТО ЭТО? ============ */
+let g1order = [], g1i = 0;
+function game1() {
+  g1order = shuffle(FAMILY); g1i = 0;
+  playVoice("sounds/v03.mp3", 400);
+  g1round();
+}
+function g1round() {
+  const who = g1order[g1i];
+  const others = shuffle(FAMILY.filter(f => f.id !== who.id)).slice(0, 2);
+  const options = shuffle([who, ...others]);
+  content.innerHTML = `
+    <div class="card">
+      <h2>🎯 Игра 1. Кто это?</h2>
+      <div class="dialog"><img class="avatar-img" src="images/heroes/natasha.jpg" alt="Наташа">
+      <div class="speech">Наташа: «Смотри, кто к нам пришёл! Найди такого же на картинках внизу и нажми.»</div></div>
+      <div class="imgwrap"><img class="portrait" src="${who.img}" alt="кто это?"></div>
+      <div id="opts">
+        ${options.map(o => `<button class="opt imgopt" onclick="g1pick('${o.id}','${who.id}',this)"><img src="${o.img}" alt="">${o.name}</button>`).join("")}
+      </div>
+    </div>`;
+}
+function g1pick(picked, correct, btn) {
+  if (locked) return; locked = true;
+  if (picked === correct) {
+    btn.classList.add("good");
+    sound("good");
+    setTimeout(() => {
+      locked = false; g1i++;
+      if (g1i < g1order.length) g1round();
+      else { addStar(); step = 3; render(); }
+    }, 800);
+  } else {
+    btn.classList.add("bad");
+    sound("bad");
+    setTimeout(() => { btn.classList.remove("bad"); locked = false; }, 600);
+  }
+}
+
+/* ============ ИГРА 2: КТО ЧТО ДЕЛАЕТ? ============ */
+let g2order = [], g2i = 0;
+function game2() {
+  g2order = shuffle(ACTS); g2i = 0;
+  playVoice("sounds/v04.mp3", 400);
+  g2round();
+}
+function g2round() {
+  const act = g2order[g2i];
+  const whoObj = FAMILY.find(f => f.id === act.who);
+  const others = shuffle(FAMILY.filter(f => f.id !== act.who)).slice(0, 2);
+  const options = shuffle([whoObj, ...others]);
+  const vn = {mama_gotovit:"05", papa_chinit:"06", babushka_pechet:"07", dedushka_chitaet:"08", dochka_risuet:"09", synok_stroit:"10"}[act.id];
+  playVoice("sounds/v" + vn + ".mp3", g2i === 0 ? 5800 : 2000);
+  content.innerHTML = `
+    <div class="card">
+      <h2><img class="h2avatar" src="images/heroes/yasha.jpg" alt="Яша">Игра 2. Кто что делает?</h2>
+      <div class="dialog"><img class="avatar-img" src="images/heroes/balovashka.jpg" alt="Баловашка">
+      <div class="speech">Баловашка: «Ой, я опять всё перепутал! Кто это делает? Помоги мне!»</div></div>
+      <button onclick="qReplay(${vn})">🔊 Послушать вопрос ещё раз</button>
+      <div class="label">${act.q}</div>
+      <div class="imgwrap"><img class="portrait" src="${act.img}" alt="действие"></div>
+      <div id="opts">
+        ${options.map(o => `<button class="opt imgopt" onclick="g2pick('${o.id}','${act.who}',this)"><img src="${o.img}" alt="">${o.name}</button>`).join("")}
+      </div>
+    </div>`;
+}
+function g2pick(picked, correct, btn) {
+  if (locked) return; locked = true;
+  if (picked === correct) {
+    btn.classList.add("good");
+    sound("good");
+    setTimeout(() => {
+      locked = false; g2i++;
+      if (g2i < g2order.length) g2round();
+      else { addStar(); step = 4; render(); }
+    }, 800);
+  } else {
+    btn.classList.add("bad");
+    sound("bad");
+    setTimeout(() => { btn.classList.remove("bad"); locked = false; }, 600);
+  }
+}
+
+/* ============ ИГРА 3: СОСЧИТАЙ СЕМЬЮ ============ */
+let g3q = [
+  { q: "Сколько ВЗРОСЛЫХ в семье?", opts: [3, 4, 5], ans: 4 },
+  { q: "Сколько ДЕТЕЙ в семье?", opts: [1, 2, 3], ans: 2 },
+  { q: "Сколько ВСЕГО человек в семье?", opts: [5, 6, 7], ans: 6 }
+], g3i = 0;
+function game3() { g3i = 0; playVoice("sounds/v11.mp3", 400); g3round(); }
+function g3round() {
+  const item = g3q[g3i];
+  playVoice("sounds/v" + (12 + g3i) + ".mp3", g3i === 0 ? 4000 : 2000);
+  content.innerHTML = `
+    <div class="card">
+      <h2>🔢 Игра 3. Сосчитай семью</h2>
+      <div class="dialog"><img class="avatar-img" src="images/heroes/natasha.jpg" alt="Наташа">
+      <div class="speech">Наташа: «Посмотри внимательно на семью и сосчитай!»</div></div>
+      <button onclick="playVoice('sounds/v${12 + g3i}.mp3')">🔊 Послушать вопрос ещё раз</button>
+      <div class="imgwrap"><img src="${IMG.vsya_semya}" alt="вся семья"></div>
+      <div class="label">${item.q}</div>
+      <div class="numrow">
+        ${shuffle(item.opts).map(o => `<button class="opt" onclick="g3pick(${o},${item.ans},this)">${o}</button>`).join("")}
+      </div>
+    </div>`;
+}
+function g3pick(picked, correct, btn) {
+  if (locked) return; locked = true;
+  if (picked === correct) {
+    btn.classList.add("good");
+    sound("good");
+    setTimeout(() => {
+      locked = false; g3i++;
+      if (g3i < g3q.length) g3round();
+      else { addStar(); step = 5; render(); }
+    }, 800);
+  } else {
+    btn.classList.add("bad");
+    sound("bad");
+    setTimeout(() => { btn.classList.remove("bad"); locked = false; }, 600);
+  }
+}
+
+/* ============ ИГРА 4: НАЙДИ ОТЛИЧИЯ (клик по зонам) ============ */
+const DIFFS = [
+  { id: "okno",    name: "погода за окном!",       l: 48, t: 14, w: 18, h: 39 },
+  { id: "vyazanie",name: "вязание бабушки!",       l: 76, t: 52, w: 19, h: 36 },
+  { id: "podushkaP",name: "подушка справа!",       l: 28, t: 52, w: 16, h: 13 },
+  { id: "podushkaL",name: "подушка слева!",        l: 0,  t: 54, w: 16, h: 14 },
+  { id: "chasy",   name: "часы на стене!",         l: 6,  t: 18, w: 13, h: 14 },
+  { id: "buket",   name: "букет цветов!",          l: 43, t: 56, w: 12, h: 15 },
+  { id: "myach",   name: "мячик на ковре!",        l: 44, t: 83, w: 15, h: 12 },
+  { id: "bantik",  name: "бантик у девочки!",      l: 36, t: 65, w: 7,  h: 8 }
+];
+let foundDiff = new Set();
+let diffLocked = false;
+let showSecond = false;
+function game4() {
+  foundDiff = new Set(); diffLocked = false; showSecond = false;
+  playVoice("sounds/v15.mp3", 500);
+  content.innerHTML = `
+    <div class="card">
+      <h2>🕵️ Игра 4. Найди отличия!</h2>
+      <div class="dialog"><img class="avatar-img" src="images/heroes/balovashka.jpg" alt="Баловашка">
+      <div class="speech">Баловашка: «Я тут немножко похозяйничал в гостиной… Найди ВСЕ, что я изменил! Нажимай на те места, где что-то не так.»</div></div>
+      <div class="label" id="findLabel">Найдено: <b id="cnt">0</b> из 8. Кликай по отличиям!</div>
+      <div class="findwrap" id="findWrap">
+        <img id="findImg" src="${IMG.gostinaya2}" alt="гостиная: найди отличия">
+        ${DIFFS.map((d, i) => `<div class="hot" id="hot_${d.id}" style="left:${d.l}%;top:${d.t}%;width:${d.w}%;height:${d.h}%"
+          onclick="hitDiff('${d.id}',${i})"></div>`).join("")}
+      </div>
+      <div class="row2">
+        <button onclick="peekDiff(false)">👈 Было</button>
+        <button onclick="peekDiff(true)">Стало 👉</button>
+      </div>
+      <button onclick="hintDiff()">💡 Подсказка</button>
+      <button onclick="showAllDiffs()">🙋 Покажи, где отличия</button>
+      <button id="contBtn4" class="hidden" onclick="showWin4()">Продолжить ➡</button>
+    </div>`;
+}
+function hitDiff(id, idx) {
+  if (diffLocked || foundDiff.has(id)) return;
+  const el = document.getElementById("hot_" + id);
+  foundDiff.add(id);
+  el.classList.add("found");
+  document.getElementById("cnt").textContent = foundDiff.size;
+  sound("good");
+  diffLocked = true;
+  const say = document.createElement("div");
+  say.style.cssText = "position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#4caf50;color:#fff;padding:8px 16px;border-radius:12px;font-size:17px;z-index:5;box-shadow:0 3px 10px rgba(0,0,0,.2)";
+  say.textContent = "Нашёл: " + DIFFS[idx].name;
+  document.getElementById("findWrap").appendChild(say);
+  setTimeout(() => {
+    say.remove(); diffLocked = false;
+    if (foundDiff.size === DIFFS.length) {
+      showWin4();
+    }
+  }, 1100);
+}
+function showWin4() {
+  addStar();
+  fxPlay("sounds/Молодец-_3_.mp3");
+  content.innerHTML = `
+    <div class="card" style="text-align:center">
+      <div class="bigstar">🎉</div>
+      <h2>Ура! Ты настоящий сыщик!</h2>
+      <p style="font-size:18px;color:#4a3a2a;margin:12px 0">Ты нашёл ВСЕ ${DIFFS.length} отличий и спас гостиную от шалостей Баловашки!</p>
+      <div class="dialog" style="text-align:left"><img class="avatar-img" src="images/heroes/yasha.jpg" alt="Яша">
+      <div class="speech">Яша: «Молодец! Баловашка обещает больше не шалить… ну, почти! А теперь — самое главное. Нажми дальше!»</div></div>
+      <button onclick="step=6;render()">Дальше ➡</button>
+    </div>`;
+}
+function peekDiff(second) {
+  showSecond = second;
+  const img = document.getElementById("findImg");
+  img.src = second ? IMG.gostinaya2 : IMG.gostinaya1;
+  document.querySelectorAll(".hot").forEach(h => {
+    h.style.display = second ? "block" : "none";
+  });
+  fxPlay(second ? "sounds/Попробуй-еще.mp3" : "sounds/Правильно.mp3");
+  if (!second) {
+    // показали «Было» для сравнения — через 2,5 сек сами вернём «Стало», чтобы игра продолжилась
+    clearTimeout(window._peekTimer);
+    window._peekTimer = setTimeout(() => {
+      peekDiff(true);
+      const lbl = document.getElementById("findLabel");
+      if (lbl) lbl.textContent = "Найдено: " + foundDiff.size + " из 8. Ищи дальше!";
+    }, 2500);
+  } else {
+    clearTimeout(window._peekTimer);
+  }
+}
+function hintDiff() {
+  try {
+    const next = DIFFS.find(d => !foundDiff.has(d.id));
+    if (!next) return;
+    const el = document.getElementById("hot_" + next.id);
+    if (!el) return;
+    el.classList.remove("hint");
+    void el.offsetWidth;
+    el.classList.add("hint");
+    clearTimeout(el._hintT);
+    el._hintT = setTimeout(() => el.classList.remove("hint"), 2500);
+    fxPlay("sounds/Подумай.mp3");
+  } catch (e) {}
+}
+
+function showAllDiffs() {
+  try {
+    DIFFS.forEach((d, i) => {
+      if (foundDiff.has(d.id)) return;
+      const el = document.getElementById("hot_" + d.id);
+      if (!el) return;
+      foundDiff.add(d.id);
+      el.classList.add("found");
+      const cnt = document.getElementById("cnt");
+      if (cnt) cnt.textContent = foundDiff.size;
+    });
+    const cont = document.getElementById("contBtn4");
+    if (cont) cont.classList.remove("hidden");
+    fxPlay("sounds/Правильно.mp3");
+  } catch (e) {}
+}
+
+function qReplay(vn) {
+  const path = "sounds/v" + vn + ".mp3";
+  try {
+    const a = new Audio(path);
+    a.volume = 1;
+    const pr = a.play();
+    if (pr && pr.catch) pr.catch(() => {});
+  } catch (e) {}
+}
+
+
+/* ============ ЭКРАН 6: ФИНАЛ ============ */
+function screenFinal() {
+  const done = localStorage.getItem("yasha_semya_done") === "1";
+  content.innerHTML = `
+    <div class="card">
+      <div class="bigstar">⭐</div>
+      <h2><img class="h2avatar" src="images/heroes/yasha.jpg" alt="Яша">Пословица</h2>
+      <div class="riddle">«Вся семья вместе — и душа на месте»</div>
+      <div class="dialog"><img class="avatar-img" src="images/heroes/yasha.jpg" alt="Яша">
+      <div class="speech">Яша: «Вот и закончилось наше приключение! Ты так помог семье — молодец! Посмотри, что скажет Наташа…»</div></div>
+      <button onclick="playVoice('sounds/v16.mp3')">🔊 Послушать пословицу</button>
+      <video id="v2" src="${V.end}" poster="images/poster_itog.jpg" playsinline preload="none"></video>
+      <button onclick="document.getElementById('v2').play()">▶ Смотреть финал</button>
+      <button onclick="showFinal()">Пропустить ➡</button>
+    </div>
+    <div class="card" id="finalCard" style="text-align:center;${done ? "" : "display:none"}">
+      <div class="bigstar">⭐</div>
+      <h2>Занятие пройдено!</h2>
+      <p style="margin:10px 0;color:#4a3a2a">Ты собрал ${earnedStars} звёзд и теперь знаешь всю семью!</p>
+      <button onclick="location.reload()">Пройти ещё раз 🔄</button>
+    </div>`;
+  playVoice("sounds/v16.mp3", 700);
+  const v = document.getElementById("v2");
+  v.preload = "auto"; v.load(); // фоновая загрузка финального видео
+  v.addEventListener("ended", showFinal);
+  v.addEventListener("error", showFinal);
+}
+function showFinal() {
+  localStorage.setItem("yasha_semya_done", "1");
+  const fc = document.getElementById("finalCard");
+  if (fc) fc.style.display = "block";
+  sound("good");
+  playVoice("sounds/v17.mp3", 600);
+}
+
+render();
+</script>
+</body>
+</html>
